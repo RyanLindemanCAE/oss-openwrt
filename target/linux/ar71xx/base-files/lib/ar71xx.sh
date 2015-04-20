@@ -274,6 +274,12 @@ ar71xx_board_detect() {
 	*"AP135-020 reference board")
 		name="ap135-020"
 		;;
+	*"AP143 reference board")
+		name="ap143"
+		;;
+	*"AP147 reference board")
+		name="ap147"
+		;;
 	*AP81)
 		name="ap81"
 		;;
@@ -294,6 +300,15 @@ ar71xx_board_detect() {
 		;;
 	*CAP4200AG)
 		name="cap4200ag"
+		;;
+	*"CUS531 reference board")
+		name="cus531"
+		;;
+	*"CUS531 dual reference board")
+		name="cus531-dual"
+		;;
+	*"CUS531 nand reference board")
+		name="cus531-nand"
 		;;
 	*"DB120 reference board")
 		name="db120"

@@ -1,0 +1,35 @@
+--- a/drivers/mtd/devices/m25p80.c
++++ b/drivers/mtd/devices/m25p80.c
+@@ -747,8 +747,12 @@ static const struct spi_device_id m25p_i
+ 	{ "mr25h256", CAT25_INFO(  32 * 1024, 1, 256, 2) },
+ 
+ 	/* GigaDevice */
++	{ "md25d40", INFO(0x514013, 0, 64 * 1024,   8, SECT_4K) },
++	{ "gd25d20", INFO(0xc84012, 0, 64 * 1024,   4, SECT_4K) },
++	{ "gd25d40", INFO(0xc84013, 0, 64 * 1024,   8, SECT_4K) },
+ 	{ "gd25q32", INFO(0xc84016, 0, 64 * 1024,  64, SECT_4K) },
+ 	{ "gd25q64", INFO(0xc84017, 0, 64 * 1024, 128, SECT_4K) },
++	{ "gd25q128", INFO(0xc84018, 0, 64 * 1024, 256, SECT_4K) },
+ 
+ 	/* Intel/Numonyx -- xxxs33b */
+ 	{ "160s33b",  INFO(0x898911, 0, 64 * 1024,  32, 0) },
+--- a/drivers/mtd/nand/nand_ids.c
++++ b/drivers/mtd/nand/nand_ids.c
+@@ -168,6 +168,7 @@ struct nand_manufacturers nand_manuf_ids
+ 	{NAND_MFR_MICRON, "Micron"},
+ 	{NAND_MFR_AMD, "AMD/Spansion"},
+ 	{NAND_MFR_MACRONIX, "Macronix"},
++	{NAND_MFR_GIGADEVICE, "Giga Device"},
+ 	{NAND_MFR_EON, "Eon"},
+ 	{0x0, "Unknown"}
+ };
+--- a/include/linux/mtd/nand.h
++++ b/include/linux/mtd/nand.h
+@@ -548,6 +548,7 @@ struct nand_chip {
+ #define NAND_MFR_MICRON		0x2c
+ #define NAND_MFR_AMD		0x01
+ #define NAND_MFR_MACRONIX	0xc2
++#define NAND_MFR_GIGADEVICE	0xc8
+ #define NAND_MFR_EON		0x92
+ 
+ /* The maximum expected count of bytes in the NAND ID sequence */

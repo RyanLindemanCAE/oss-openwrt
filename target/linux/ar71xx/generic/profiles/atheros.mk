@@ -71,6 +71,28 @@ endef
 
 $(eval $(call Profile,AP136))
 
+define Profile/AP143
+	NAME:=Atheros AP143 reference board
+	PACKAGES:=kmod-usb-core kmod-usb2 kmod-usb-storage
+endef
+
+define Profile/AP143/Description
+	Package set optimized for the Atheros AP143 reference board.
+endef
+
+$(eval $(call Profile,AP143))
+
+define Profile/AP147
+	NAME:=Atheros AP147 reference board
+	PACKAGES:=kmod-usb-core kmod-usb2 kmod-usb-storage
+endef
+
+define Profile/AP147/Description
+	Package set optimized for the Atheros AP147 reference board.
+endef
+
+$(eval $(call Profile,AP147))
+
 define Profile/AP81
 	NAME:=Atheros AP81 reference board
 	PACKAGES:=kmod-usb-core kmod-usb2
@@ -104,6 +126,39 @@ define Profile/AP96/Description
 endef
 
 $(eval $(call Profile,AP96))
+
+define Profile/CUS531
+	NAME:=Atheros CUS531 reference board
+	PACKAGES:=kmod-usb-core kmod-usb2 kmod-usb-storage
+endef
+
+define Profile/CUS531/Description
+	Package set optimized for the Atheros CUS531 reference board.
+endef
+
+$(eval $(call Profile,CUS531))
+
+define Profile/CUS531_DUAL
+	NAME:=Atheros CUS531 dual reference board
+	PACKAGES:=kmod-usb-core kmod-usb2 kmod-usb-storage
+endef
+
+define Profile/CUS531_DUAL/Description
+	Package set optimized for the Atheros CUS531 dual reference board.
+endef
+
+$(eval $(call Profile,CUS531_DUAL))
+
+define Profile/CUS531_NAND
+	NAME:=Atheros CUS531 nand reference board
+	PACKAGES:=kmod-usb-core kmod-usb2 kmod-usb-storage
+endef
+
+define Profile/CUS531_NAND/Description
+	Package set optimized for the Atheros CUS531 nand reference board.
+endef
+
+$(eval $(call Profile,CUS531_NAND))
 
 define Profile/DB120
 	NAME:=Atheros DB120 reference board
