@@ -152,7 +152,6 @@ platform_check_image() {
 	ap136-010 | \
 	ap136-020 | \
 	ap135-020 | \
-	ap143 | \
 	ap96 | \
 	db120 | \
 	hornet-ub | \
@@ -164,10 +163,6 @@ platform_check_image() {
 			return 1
 		}
 		return 0
-		;;
-	ap147)
-		platform_check_image_ap135 "$1" && return 0
-		return 1
 		;;
 	ap81 | \
 	ap83 | \
@@ -388,6 +383,14 @@ platform_check_image() {
 		fi
 		return 0
 		;;
+	ap143 | \
+	ap147 | \
+	cus531 | \
+	cus531-dual | \
+	cus531-nand)
+		platform_check_image_ath "$1" && return 0
+		return 1
+		;;
 	esac
 
 	echo "Sysupgrade is not yet supported on $board."
@@ -442,8 +445,12 @@ platform_do_upgrade() {
 		MTD_CONFIG_ARGS="-s 0x180000"
 		default_do_upgrade "$ARGV"
 		;;
-	ap147)
-		platform_do_upgrade_ap135 "$ARGV"
+	ap143 | \
+	ap147 | \
+	cus531 | \
+	cus531-dual | \
+	cus531-nand)
+		platform_do_upgrade_ath "$ARGV" "$board"
 		;;
 	*)
 		default_do_upgrade "$ARGV"

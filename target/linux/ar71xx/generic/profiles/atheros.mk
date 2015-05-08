@@ -151,7 +151,7 @@ $(eval $(call Profile,CUS531_DUAL))
 
 define Profile/CUS531_NAND
 	NAME:=Atheros CUS531 nand reference board
-	PACKAGES:=kmod-usb-core kmod-usb2 kmod-usb-storage
+	PACKAGES:=kmod-usb-core kmod-usb2 kmod-usb-storage mtd-utils mtd-utils-nandwrite
 endef
 
 define Profile/CUS531_NAND/Description
