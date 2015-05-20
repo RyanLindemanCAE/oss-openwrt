@@ -485,27 +485,27 @@ define Image/Build/Ath
 	fi
 endef
 
-Image/Build/AthNAND/buildkernel=$(call MkuImageLzma,$(2),$(3) $(4))
+# $(1): rootfs type
+# $(2): Board name (small caps)
+# $(6): Board name (upper caps)
+# $(7): kernel mtd partition size
 define Image/Build/AthNAND
-	$(eval imageraw=$(KDIR_TMP)/$(2)-raw.img)
 	$(CP) $(KDIR)/root.squashfs-raw $(KDIR_TMP)/root.squashfs
 	echo -ne '\xde\xad\xc0\xde' > $(KDIR_TMP)/jffs2.eof
 	$(call ubinize,ubinize-ath.ini,$(KDIR_TMP),$(KDIR_TMP)/$(2)-root.ubi,128KiB,2048,)
 	( \
 		dd if=$(KDIR_TMP)/vmlinux-$(2).uImage \
-			of=$(call imgname,kernel,$(2)).bin bs=64k conv=sync; \
+			of=$(call imgname,kernel,$(2)).bin conv=sync; \
 		dd if=$(KDIR_TMP)/$(2)-root.ubi \
 			of=$(call imgname,$(1),$(2)-rootfs).ubi bs=128k conv=sync; \
 	)
 	( \
-		dd if=$(KDIR_TMP)/vmlinux-$(2).uImage; \
-		dd if=$(KDIR_TMP)/$(2)-root.ubi \
-	) > $(imageraw)
-	$(STAGING_DIR_HOST)/bin/mkdniimg \
-		-B $(6) \
-		-i $(imageraw) \
-		-o $(call sysupname,$(1),$(2))
+		dd if=$(call imgname,kernel,$(2)).bin bs=$(7) conv=sync; \
+		dd if=$(call imgname,$(1),$(2)-rootfs).ubi \
+	) > $(call sysupname,$(1),$(2))
 endef
+
+Image/Build/AthNAND/buildkernel=$(call MkuImageLzma,$(2),$(3) $(4))
 
 Image/Build/AthGzip/buildkernel=$(call MkuImageGzip,$(2),$(3) $(4))
 Image/Build/AthGzip=$(call Image/Build/Ath,$(1),$(2),$(3),$(4),$(5),$(6),$(7))
@@ -1107,7 +1107,7 @@ $(eval $(call SingleProfile,AthLzma,64k,AP136_020,ap136-020,AP136-020,ttyS0,1152
 $(eval $(call SingleProfile,AthLzma,64k,AP143_8M,ap143-8M,AP143,ttyS0,115200,$$(ap143_mtdlayout_8M),RKuImage))
 $(eval $(call SingleProfile,AthLzma,64k,AP143_16M,ap143-16M,AP143,ttyS0,115200,$$(ap143_mtdlayout_16M),RKuImage))
 $(eval $(call SingleProfile,AthLzma,64k,AP143_32M,ap143-32M,AP143,ttyS0,115200,$$(ap143_mtdlayout_32M),RKuImage))
-$(eval $(call SingleProfile,AthLzma,64k,AP143_32M_DUAL,ap143-32M-dual,AP143,ttyS0,115200,,RKuImage))
+$(eval $(call SingleProfile,AthLzma,64k,AP143_32M_DUAL,ap143-32M-dual,AP143,ttyS0,115200,,RKuImage,1507328,14876672))
 $(eval $(call SingleProfile,AthLzma,64k,AP147_8M,ap147-8M,AP147,ttyS0,115200,$$(ap147_mtdlayout_8M),RKuImage))
 $(eval $(call SingleProfile,AthLzma,64k,AP147_16M,ap147-16M,AP147,ttyS0,115200,$$(ap147_mtdlayout_16M),RKuImage))
 $(eval $(call SingleProfile,AthLzma,64k,BXU2000N2,bxu2000n-2-a1,BXU2000n-2-A1,ttyS0,115200,$$(bxu2000n2_mtdlayout),RKuImage))
@@ -1117,8 +1117,8 @@ $(eval $(call SingleProfile,AthLzma,64k,CUS531_32M,cus531-32M,CUS531,ttyS0,11520
 $(eval $(call SingleProfile,AthLzma,64k,CUS531_32M_DUAL,cus531-32M-dual,CUS531,ttyS0,115200,,RKuImage,1507328,14876672))
 $(eval $(call SingleProfile,AthLzma,64k,CUS531_DUAL,cus531-dual,CUS531-DUAL,ttyS0,115200,$$(cus531_mtdlayout_dual),RKuImage))
 $(eval $(call SingleProfile,AthLzma,64k,CUS531_DUAL_DUAL,cus531-dual-dual,CUS531-DUAL,ttyS0,115200,,RKuImage,1507328,14876672))
-$(eval $(call SingleProfile,AthNAND,64k,CUS531_NAND,cus531-nand,CUS531-NAND,ttyS0,115200,$$(cus531_mtdlayout_nand),KRuImage,CUS531-NAND))
-$(eval $(call SingleProfile,AthNAND,64k,CUS531_NAND_DUAL,cus531-nand-dual,CUS531-NAND,ttyS0,115200,$$(cus531_mtdlayout_nand),KRuImage,CUS531-NAND))
+$(eval $(call SingleProfile,AthNAND,64k,CUS531_NAND,cus531-nand,CUS531-NAND,ttyS0,115200,$$(cus531_mtdlayout_nand),KRuImage,CUS531-NAND,2097152))
+$(eval $(call SingleProfile,AthNAND,64k,CUS531_NAND_DUAL,cus531-nand-dual,CUS531-NAND,ttyS0,115200,$$(cus531_mtdlayout_nand),KRuImage,CUS531-NAND,2097152))
 $(eval $(call SingleProfile,AthLzma,64k,DB120,db120,DB120,ttyS0,115200,$$(db120_mtdlayout),RKuImage))
 $(eval $(call SingleProfile,AthLzma,64k,DRAGINO2,dragino2,DRAGINO2,ttyATH0,115200,$$(dragino2_mtdlayout),KRuImage,65536))
 $(eval $(call SingleProfile,AthLzma,64k,EWDORINAP,ew-dorin,EW-DORIN,ttyATH0,115200,$$(ew-dorin_mtdlayout_4M),KRuImage,65536))
