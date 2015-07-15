@@ -1,6 +1,8 @@
---- a/arch/mips/ath79/pci.c
-+++ b/arch/mips/ath79/pci.c
-@@ -53,6 +53,15 @@ static const struct ath79_pci_irq ar724x
+Index: linux-3.10.49/arch/mips/ath79/pci.c
+===================================================================
+--- linux-3.10.49.orig/arch/mips/ath79/pci.c	2015-07-15 15:44:53.090359775 -0600
++++ linux-3.10.49/arch/mips/ath79/pci.c	2015-07-15 15:46:35.770715872 -0600
+@@ -53,6 +53,15 @@
  	}
  };
  
@@ -16,7 +18,7 @@
  static const struct ath79_pci_irq qca955x_pci_irq_map[] __initconst = {
  	{
  		.bus	= 0,
-@@ -83,6 +92,9 @@ int __init pcibios_map_irq(const struct
+@@ -83,6 +92,9 @@
  			   soc_is_ar9344()) {
  			ath79_pci_irq_map = ar724x_pci_irq_map;
  			ath79_pci_nr_irqs = ARRAY_SIZE(ar724x_pci_irq_map);
@@ -26,7 +28,7 @@
  		} else if (soc_is_qca955x()) {
  			ath79_pci_irq_map = qca955x_pci_irq_map;
  			ath79_pci_nr_irqs = ARRAY_SIZE(qca955x_pci_irq_map);
-@@ -285,6 +297,15 @@ int __init ath79_register_pci(void)
+@@ -285,6 +297,15 @@
  						 AR724X_PCI_MEM_SIZE,
  						 0,
  						 ATH79_IP2_IRQ(0));
@@ -42,8 +44,10 @@
  	} else if (soc_is_qca9558()) {
  		pdev = ath79_register_pci_ar724x(0,
  						 QCA955X_PCI_CFG_BASE0,
---- a/arch/mips/include/asm/mach-ath79/ar71xx_regs.h
-+++ b/arch/mips/include/asm/mach-ath79/ar71xx_regs.h
+Index: linux-3.10.49/arch/mips/include/asm/mach-ath79/ar71xx_regs.h
+===================================================================
+--- linux-3.10.49.orig/arch/mips/include/asm/mach-ath79/ar71xx_regs.h	2015-07-15 15:46:35.758715829 -0600
++++ linux-3.10.49/arch/mips/include/asm/mach-ath79/ar71xx_regs.h	2015-07-15 15:46:35.770715872 -0600
 @@ -26,7 +26,7 @@
  #define AR71XX_GE1_BASE		0x1a000000
  #define AR71XX_GE1_SIZE		0x10000
@@ -328,9 +332,22 @@
   * QCA955X GMAC Interface
   */
  
---- a/arch/mips/ath79/dev-wmac.c
-+++ b/arch/mips/ath79/dev-wmac.c
-@@ -280,7 +280,7 @@ bool __init ar93xx_wmac_read_mac_address
+Index: linux-3.10.49/arch/mips/ath79/dev-wmac.c
+===================================================================
+--- linux-3.10.49.orig/arch/mips/ath79/dev-wmac.c	2015-07-15 15:44:53.078359732 -0600
++++ linux-3.10.49/arch/mips/ath79/dev-wmac.c	2015-07-15 15:47:30.558905878 -0600
+@@ -157,8 +157,8 @@
+ 
+ 	ath79_wmac_resources[0].start = QCA953X_WMAC_BASE;
+ 	ath79_wmac_resources[0].end = QCA953X_WMAC_BASE + QCA953X_WMAC_SIZE - 1;
+-	ath79_wmac_resources[1].start = ATH79_CPU_IRQ(2);
+-	ath79_wmac_resources[1].end = ATH79_CPU_IRQ(2);
++	ath79_wmac_resources[1].start = ATH79_IP2_IRQ(1);
++	ath79_wmac_resources[1].end = ATH79_IP2_IRQ(1);
+ 
+ 	t = ath79_reset_rr(QCA953X_RESET_REG_BOOTSTRAP);
+ 	if (t & QCA953X_BOOTSTRAP_REF_CLK_40)
+@@ -280,7 +280,7 @@
  	u8 mac[6] = { 0x00, 0x02, 0x03, 0x04, 0x05, 0x06 };
  	int mac_start = 2, mac_end = 8;
  
@@ -339,9 +356,23 @@
  	base = ioremap_nocache(AR933X_WMAC_BASE, AR933X_WMAC_SIZE);
  	while (addr > sizeof(hdr)) {
  		if (!ar93xx_wmac_otp_read(base, addr, hdr, sizeof(hdr)))
---- a/arch/mips/ath79/gpio.c
-+++ b/arch/mips/ath79/gpio.c
-@@ -94,6 +94,31 @@ static int ath79_gpio_direction_output(s
+@@ -378,6 +378,11 @@
+ 		ar934x_set_ext_lna_gpio(chain, gpio);
+ }
+ 
++void __init ath79_wmac_set_led_pin(int gpio)
++{
++	ath79_wmac_data.led_pin = gpio;
++}
++
+ void __init ath79_register_wmac(u8 *cal_data, u8 *mac_addr)
+ {
+ 	if (soc_is_ar913x())
+Index: linux-3.10.49/arch/mips/ath79/gpio.c
+===================================================================
+--- linux-3.10.49.orig/arch/mips/ath79/gpio.c	2015-07-15 15:44:53.050359635 -0600
++++ linux-3.10.49/arch/mips/ath79/gpio.c	2015-07-15 15:46:35.770715872 -0600
+@@ -94,6 +94,31 @@
  	return 0;
  }
  
@@ -373,7 +404,7 @@
  static int ar934x_gpio_direction_input(struct gpio_chip *chip, unsigned offset)
  {
  	void __iomem *base = ath79_gpio_base;
-@@ -148,7 +173,7 @@ static void __iomem *ath79_gpio_get_func
+@@ -148,7 +173,7 @@
  	    soc_is_ar913x() ||
  	    soc_is_ar933x())
  		reg = AR71XX_GPIO_REG_FUNC;
@@ -382,7 +413,7 @@
  		reg = AR934X_GPIO_REG_FUNC;
  	else
  		BUG();
-@@ -180,31 +205,174 @@ void ath79_gpio_function_disable(u32 mas
+@@ -180,31 +205,174 @@
  	ath79_gpio_function_setup(0, mask);
  }
  
@@ -562,7 +593,7 @@
  	spin_unlock_irqrestore(&ath79_gpio_lock, flags);
  }
  
-@@ -236,6 +404,9 @@ void __init ath79_gpio_init(void)
+@@ -236,6 +404,9 @@
  	if (soc_is_ar934x() || soc_is_qca953x() || soc_is_qca955x()) {
  		ath79_gpio_chip.direction_input = ar934x_gpio_direction_input;
  		ath79_gpio_chip.direction_output = ar934x_gpio_direction_output;
@@ -572,9 +603,11 @@
  	}
  
  	err = gpiochip_add(&ath79_gpio_chip);
---- a/arch/mips/ath79/common.h
-+++ b/arch/mips/ath79/common.h
-@@ -26,7 +26,9 @@ void ath79_ddr_wb_flush(unsigned int reg
+Index: linux-3.10.49/arch/mips/ath79/common.h
+===================================================================
+--- linux-3.10.49.orig/arch/mips/ath79/common.h	2015-07-15 15:44:53.082359745 -0600
++++ linux-3.10.49/arch/mips/ath79/common.h	2015-07-15 15:46:35.770715872 -0600
+@@ -26,7 +26,9 @@
  void ath79_gpio_function_enable(u32 mask);
  void ath79_gpio_function_disable(u32 mask);
  void ath79_gpio_function_setup(u32 set, u32 clear);
@@ -584,9 +617,11 @@
  void ath79_gpio_init(void);
  
  #endif /* __ATH79_COMMON_H */
---- a/arch/mips/ath79/irq.c
-+++ b/arch/mips/ath79/irq.c
-@@ -154,6 +154,27 @@ static void ar934x_ip2_irq_init(void)
+Index: linux-3.10.49/arch/mips/ath79/irq.c
+===================================================================
+--- linux-3.10.49.orig/arch/mips/ath79/irq.c	2015-07-15 15:44:53.094359788 -0600
++++ linux-3.10.49/arch/mips/ath79/irq.c	2015-07-15 15:46:35.770715872 -0600
+@@ -154,6 +154,27 @@
  	irq_set_chained_handler(ATH79_CPU_IRQ(2), ar934x_ip2_irq_dispatch);
  }
  
@@ -614,7 +649,7 @@
  static void qca955x_ip2_irq_dispatch(unsigned int irq, struct irq_desc *desc)
  {
  	u32 status;
-@@ -217,6 +238,18 @@ enable:
+@@ -217,6 +238,18 @@
  	enable_irq(irq);
  }
  
@@ -633,7 +668,7 @@
  static void qca955x_irq_init(void)
  {
  	int i;
-@@ -336,6 +369,12 @@ static void ar934x_ip3_handler(void)
+@@ -336,6 +369,12 @@
  	do_IRQ(ATH79_CPU_IRQ(3));
  }
  
@@ -646,7 +681,7 @@
  void __init arch_init_irq(void)
  {
  	if (soc_is_ar71xx()) {
-@@ -355,7 +394,7 @@ void __init arch_init_irq(void)
+@@ -355,7 +394,7 @@
  		ath79_ip3_handler = ar934x_ip3_handler;
  	} else if (soc_is_qca953x()) {
  		ath79_ip2_handler = ath79_default_ip2_handler;
@@ -655,7 +690,7 @@
  	} else if (soc_is_qca955x()) {
  		ath79_ip2_handler = ath79_default_ip2_handler;
  		ath79_ip3_handler = ath79_default_ip3_handler;
-@@ -369,6 +408,8 @@ void __init arch_init_irq(void)
+@@ -369,6 +408,8 @@
  
  	if (soc_is_ar934x())
  		ar934x_ip2_irq_init();
@@ -664,9 +699,11 @@
  	else if (soc_is_qca955x())
  		qca955x_irq_init();
  }
---- a/arch/mips/ath79/clock.c
-+++ b/arch/mips/ath79/clock.c
-@@ -168,7 +168,7 @@ static void __init ar933x_clocks_init(vo
+Index: linux-3.10.49/arch/mips/ath79/clock.c
+===================================================================
+--- linux-3.10.49.orig/arch/mips/ath79/clock.c	2015-07-15 15:44:53.042359608 -0600
++++ linux-3.10.49/arch/mips/ath79/clock.c	2015-07-15 15:46:35.770715872 -0600
+@@ -168,7 +168,7 @@
  	ath79_uart_clk.rate = ath79_ref_clk.rate;
  }
  
@@ -675,7 +712,7 @@
  				      u32 frac, u32 out_div)
  {
  	u64 t;
-@@ -227,7 +227,7 @@ static void __init ar934x_clocks_init(vo
+@@ -227,7 +227,7 @@
  		frac = 1 << 6;
  	}
  
@@ -684,7 +721,7 @@
  				      nfrac, frac, out_div);
  
  	pll = __raw_readl(dpll_base + AR934X_SRIF_DDR_DPLL2_REG);
-@@ -254,7 +254,7 @@ static void __init ar934x_clocks_init(vo
+@@ -254,7 +254,7 @@
  		frac = 1 << 10;
  	}
  
@@ -693,7 +730,7 @@
  				      nfrac, frac, out_div);
  
  	clk_ctrl = ath79_pll_rr(AR934X_PLL_CPU_DDR_CLK_CTRL_REG);
-@@ -297,7 +297,7 @@ static void __init ar934x_clocks_init(vo
+@@ -297,7 +297,7 @@
  
  static void __init qca953x_clocks_init(void)
  {
@@ -702,7 +739,7 @@
  	u32 cpu_pll, ddr_pll;
  	u32 bootstrap;
  
-@@ -314,12 +314,12 @@ static void __init qca953x_clocks_init(v
+@@ -314,12 +314,12 @@
  		  QCA953X_PLL_CPU_CONFIG_REFDIV_MASK;
  	nint = (pll >> QCA953X_PLL_CPU_CONFIG_NINT_SHIFT) &
  	       QCA953X_PLL_CPU_CONFIG_NINT_MASK;
@@ -719,7 +756,7 @@
  
  	pll = ath79_pll_rr(QCA953X_PLL_DDR_CONFIG_REG);
  	out_div = (pll >> QCA953X_PLL_DDR_CONFIG_OUTDIV_SHIFT) &
-@@ -328,12 +328,12 @@ static void __init qca953x_clocks_init(v
+@@ -328,12 +328,12 @@
  		  QCA953X_PLL_DDR_CONFIG_REFDIV_MASK;
  	nint = (pll >> QCA953X_PLL_DDR_CONFIG_NINT_SHIFT) &
  	       QCA953X_PLL_DDR_CONFIG_NINT_MASK;
@@ -736,7 +773,7 @@
  
  	clk_ctrl = ath79_pll_rr(QCA953X_PLL_CLK_CTRL_REG);
  
-@@ -373,7 +373,7 @@ static void __init qca953x_clocks_init(v
+@@ -373,7 +373,7 @@
  
  static void __init qca955x_clocks_init(void)
  {
@@ -745,7 +782,7 @@
  	u32 cpu_pll, ddr_pll;
  	u32 bootstrap;
  
-@@ -390,12 +390,12 @@ static void __init qca955x_clocks_init(v
+@@ -390,12 +390,12 @@
  		  QCA955X_PLL_CPU_CONFIG_REFDIV_MASK;
  	nint = (pll >> QCA955X_PLL_CPU_CONFIG_NINT_SHIFT) &
  	       QCA955X_PLL_CPU_CONFIG_NINT_MASK;
@@ -762,7 +799,7 @@
  
  	pll = ath79_pll_rr(QCA955X_PLL_DDR_CONFIG_REG);
  	out_div = (pll >> QCA955X_PLL_DDR_CONFIG_OUTDIV_SHIFT) &
-@@ -404,12 +404,12 @@ static void __init qca955x_clocks_init(v
+@@ -404,12 +404,12 @@
  		  QCA955X_PLL_DDR_CONFIG_REFDIV_MASK;
  	nint = (pll >> QCA955X_PLL_DDR_CONFIG_NINT_SHIFT) &
  	       QCA955X_PLL_DDR_CONFIG_NINT_MASK;
@@ -779,9 +816,11 @@
  
  	clk_ctrl = ath79_pll_rr(QCA955X_PLL_CLK_CTRL_REG);
  
---- a/arch/mips/ath79/dev-usb.c
-+++ b/arch/mips/ath79/dev-usb.c
-@@ -236,6 +236,26 @@ static void __init ar934x_usb_setup(void
+Index: linux-3.10.49/arch/mips/ath79/dev-usb.c
+===================================================================
+--- linux-3.10.49.orig/arch/mips/ath79/dev-usb.c	2015-07-15 15:44:53.102359815 -0600
++++ linux-3.10.49/arch/mips/ath79/dev-usb.c	2015-07-15 15:46:35.770715872 -0600
+@@ -236,6 +236,26 @@
  			   &ath79_ehci_pdata_v2, sizeof(ath79_ehci_pdata_v2));
  }
  
@@ -808,7 +847,7 @@
  static void qca955x_usb_reset_notifier(struct platform_device *pdev)
  {
  	u32 base;
-@@ -286,6 +306,8 @@ void __init ath79_register_usb(void)
+@@ -286,6 +306,8 @@
  		ar933x_usb_setup();
  	else if (soc_is_ar934x())
  		ar934x_usb_setup();
@@ -817,9 +856,11 @@
  	else if (soc_is_qca955x())
  		qca955x_usb_setup();
  	else
---- a/arch/mips/ath79/dev-eth.c
-+++ b/arch/mips/ath79/dev-eth.c
-@@ -197,6 +197,7 @@ void __init ath79_register_mdio(unsigned
+Index: linux-3.10.49/arch/mips/ath79/dev-eth.c
+===================================================================
+--- linux-3.10.49.orig/arch/mips/ath79/dev-eth.c	2015-07-15 15:44:53.058359662 -0600
++++ linux-3.10.49/arch/mips/ath79/dev-eth.c	2015-07-15 15:46:35.770715872 -0600
+@@ -197,6 +197,7 @@
  	case ATH79_SOC_AR7241:
  	case ATH79_SOC_AR9330:
  	case ATH79_SOC_AR9331:
@@ -827,7 +868,7 @@
  	case ATH79_SOC_QCA9533:
  		mdio_dev = &ath79_mdio1_device;
  		mdio_data = &ath79_mdio1_data;
-@@ -255,6 +256,7 @@ void __init ath79_register_mdio(unsigned
+@@ -255,6 +256,7 @@
  		mdio_data->is_ar934x = 1;
  		break;
  
@@ -835,7 +876,7 @@
  	case ATH79_SOC_QCA9533:
  		mdio_data->builtin_switch = 1;
  		break;
-@@ -568,6 +570,7 @@ static void __init ath79_init_eth_pll_da
+@@ -568,6 +570,7 @@
  	case ATH79_SOC_AR9341:
  	case ATH79_SOC_AR9342:
  	case ATH79_SOC_AR9344:
@@ -843,7 +884,7 @@
  	case ATH79_SOC_QCA9533:
  	case ATH79_SOC_QCA9556:
  	case ATH79_SOC_QCA9558:
-@@ -626,6 +629,7 @@ static int __init ath79_setup_phy_if_mod
+@@ -626,6 +629,7 @@
  		case ATH79_SOC_AR7241:
  		case ATH79_SOC_AR9330:
  		case ATH79_SOC_AR9331:
@@ -851,7 +892,7 @@
  		case ATH79_SOC_QCA9533:
  			pdata->phy_if_mode = PHY_INTERFACE_MODE_MII;
  			break;
-@@ -687,6 +691,7 @@ static int __init ath79_setup_phy_if_mod
+@@ -687,6 +691,7 @@
  		case ATH79_SOC_AR7241:
  		case ATH79_SOC_AR9330:
  		case ATH79_SOC_AR9331:
@@ -859,7 +900,7 @@
  		case ATH79_SOC_QCA9533:
  			pdata->phy_if_mode = PHY_INTERFACE_MODE_GMII;
  			break;
-@@ -991,6 +996,7 @@ void __init ath79_register_eth(unsigned
+@@ -991,6 +996,7 @@
  			pdata->fifo_cfg3 = 0x01f00140;
  		break;
  
@@ -867,7 +908,7 @@
  	case ATH79_SOC_QCA9533:
  		if (id == 0) {
  			pdata->reset_bit = AR933X_RESET_GE0_MAC |
-@@ -1096,6 +1102,7 @@ void __init ath79_register_eth(unsigned
+@@ -1096,6 +1102,7 @@
  		case ATH79_SOC_AR7241:
  		case ATH79_SOC_AR9330:
  		case ATH79_SOC_AR9331:
@@ -875,9 +916,11 @@
  		case ATH79_SOC_QCA9533:
  			pdata->mii_bus_dev = &ath79_mdio1_device.dev;
  			break;
---- a/arch/mips/ath79/Kconfig
-+++ b/arch/mips/ath79/Kconfig
-@@ -1121,6 +1121,11 @@ config ATH79_DEV_SPI
+Index: linux-3.10.49/arch/mips/ath79/Kconfig
+===================================================================
+--- linux-3.10.49.orig/arch/mips/ath79/Kconfig	2015-07-15 15:46:35.758715829 -0600
++++ linux-3.10.49/arch/mips/ath79/Kconfig	2015-07-15 15:46:35.770715872 -0600
+@@ -1121,6 +1121,11 @@
  config ATH79_DEV_USB
  	def_bool n
  
@@ -889,9 +932,11 @@
  config ATH79_DEV_WMAC
  	depends on (SOC_AR913X || SOC_AR933X || SOC_AR934X || SOC_QCA953X || SOC_QCA955X)
  	def_bool n
---- a/arch/mips/ath79/Makefile
-+++ b/arch/mips/ath79/Makefile
-@@ -25,6 +25,7 @@ obj-$(CONFIG_ATH79_DEV_LEDS_GPIO)	+= dev
+Index: linux-3.10.49/arch/mips/ath79/Makefile
+===================================================================
+--- linux-3.10.49.orig/arch/mips/ath79/Makefile	2015-07-15 15:46:35.750715802 -0600
++++ linux-3.10.49/arch/mips/ath79/Makefile	2015-07-15 15:46:35.770715872 -0600
+@@ -25,6 +25,7 @@
  obj-$(CONFIG_ATH79_DEV_M25P80)		+= dev-m25p80.o
  obj-$(CONFIG_ATH79_DEV_NFC)		+= dev-nfc.o
  obj-$(CONFIG_ATH79_DEV_SPI)		+= dev-spi.o
@@ -899,8 +944,10 @@
  obj-$(CONFIG_ATH79_DEV_USB)		+= dev-usb.o
  obj-$(CONFIG_ATH79_DEV_WMAC)		+= dev-wmac.o
  
---- /dev/null
-+++ b/arch/mips/ath79/dev-i2c.c
+Index: linux-3.10.49/arch/mips/ath79/dev-i2c.c
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.10.49/arch/mips/ath79/dev-i2c.c	2015-07-15 15:46:35.774715885 -0600
 @@ -0,0 +1,27 @@
 +/*
 + *  Atheros AR71XX/AR724X/AR913X I2C controller device
@@ -929,8 +976,10 @@
 +	ath79_i2c_gpio_device.dev.platform_data = pdata;
 +	platform_device_register(&ath79_i2c_gpio_device);
 +}
---- /dev/null
-+++ b/arch/mips/ath79/dev-i2c.h
+Index: linux-3.10.49/arch/mips/ath79/dev-i2c.h
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.10.49/arch/mips/ath79/dev-i2c.h	2015-07-15 15:46:35.774715885 -0600
 @@ -0,0 +1,17 @@
 +/*
 + *  Atheros AR71XX/AR724X/AR913X I2C controller device
@@ -949,3 +998,15 @@
 +			unsigned int n);
 +
 +#endif /* _ATH79_DEV_I2C_H_ */
+Index: linux-3.10.49/arch/mips/ath79/dev-wmac.h
+===================================================================
+--- linux-3.10.49.orig/arch/mips/ath79/dev-wmac.h	2015-07-15 14:45:14.217948173 -0600
++++ linux-3.10.49/arch/mips/ath79/dev-wmac.h	2015-07-15 15:48:34.959129219 -0600
+@@ -18,6 +18,7 @@
+ void ath79_wmac_disable_5ghz(void);
+ void ath79_wmac_set_tx_gain_buffalo(void);
+ void ath79_wmac_set_ext_lna_gpio(unsigned chain, int gpio);
++void ath79_wmac_set_led_pin(int gpio);
+ 
+ bool ar93xx_wmac_read_mac_address(u8 *dest);
+ 
