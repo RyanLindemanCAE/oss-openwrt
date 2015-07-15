@@ -620,8 +620,24 @@ Index: linux-3.10.49/arch/mips/ath79/common.h
 Index: linux-3.10.49/arch/mips/ath79/irq.c
 ===================================================================
 --- linux-3.10.49.orig/arch/mips/ath79/irq.c	2015-07-15 15:44:53.094359788 -0600
-+++ linux-3.10.49/arch/mips/ath79/irq.c	2015-07-15 15:46:35.770715872 -0600
-@@ -154,6 +154,27 @@
++++ linux-3.10.49/arch/mips/ath79/irq.c	2015-07-15 16:12:18.512066128 -0600
+@@ -26,6 +26,8 @@
+ 
+ static void (*ath79_ip2_handler)(void);
+ static void (*ath79_ip3_handler)(void);
++static struct irq_chip ip2_chip;
++static struct irq_chip ip3_chip;
+ 
+ static void ath79_misc_irq_handler(unsigned int irq, struct irq_desc *desc)
+ {
+@@ -148,12 +150,43 @@
+ 
+ 	for (i = ATH79_IP2_IRQ_BASE;
+ 	     i < ATH79_IP2_IRQ_BASE + ATH79_IP2_IRQ_COUNT; i++)
+-		irq_set_chip_and_handler(i, &dummy_irq_chip,
+-					 handle_level_irq);
++		irq_set_chip_and_handler(i, &ip2_chip, handle_level_irq);
+ 
  	irq_set_chained_handler(ATH79_CPU_IRQ(2), ar934x_ip2_irq_dispatch);
  }
  
@@ -646,29 +662,39 @@ Index: linux-3.10.49/arch/mips/ath79/irq.c
 +	enable_irq(irq);
 +}
 +
- static void qca955x_ip2_irq_dispatch(unsigned int irq, struct irq_desc *desc)
- {
- 	u32 status;
-@@ -217,6 +238,18 @@
- 	enable_irq(irq);
- }
- 
 +static void qca953x_irq_init(void)
 +{
 +	int i;
 +
 +	for(i = ATH79_IP2_IRQ_BASE;
 +	    i < ATH79_IP2_IRQ_BASE + ATH79_IP2_IRQ_COUNT; i++)
-+		irq_set_chip_and_handler(i, &dummy_irq_chip,
-+					 handle_level_irq);
++		irq_set_chip_and_handler(i, &ip2_chip, handle_level_irq);
 +
 +	irq_set_chained_handler(ATH79_CPU_IRQ(2), qca953x_ip2_irq_dispatch);
 +}
 +
- static void qca955x_irq_init(void)
+ static void qca955x_ip2_irq_dispatch(unsigned int irq, struct irq_desc *desc)
  {
- 	int i;
-@@ -336,6 +369,12 @@
+ 	u32 status;
+@@ -223,15 +256,13 @@
+ 
+ 	for (i = ATH79_IP2_IRQ_BASE;
+ 	     i < ATH79_IP2_IRQ_BASE + ATH79_IP2_IRQ_COUNT; i++)
+-		irq_set_chip_and_handler(i, &dummy_irq_chip,
+-					 handle_level_irq);
++		irq_set_chip_and_handler(i, &ip2_chip, handle_level_irq);
+ 
+ 	irq_set_chained_handler(ATH79_CPU_IRQ(2), qca955x_ip2_irq_dispatch);
+ 
+ 	for (i = ATH79_IP3_IRQ_BASE;
+ 	     i < ATH79_IP3_IRQ_BASE + ATH79_IP3_IRQ_COUNT; i++)
+-		irq_set_chip_and_handler(i, &dummy_irq_chip,
+-					 handle_level_irq);
++		irq_set_chip_and_handler(i, &ip3_chip, handle_level_irq);
+ 
+ 	irq_set_chained_handler(ATH79_CPU_IRQ(3), qca955x_ip3_irq_dispatch);
+ }
+@@ -336,8 +367,41 @@
  	do_IRQ(ATH79_CPU_IRQ(3));
  }
  
@@ -678,10 +704,39 @@ Index: linux-3.10.49/arch/mips/ath79/irq.c
 +	do_IRQ(ATH79_CPU_IRQ(3));
 +}
 +
++static void ath79_ip2_disable(struct irq_data *data)
++{
++	disable_irq(ATH79_CPU_IRQ(2));
++}
++
++static void ath79_ip2_enable(struct irq_data *data)
++{
++	enable_irq(ATH79_CPU_IRQ(2));
++}
++
++static void ath79_ip3_disable(struct irq_data *data)
++{
++	disable_irq(ATH79_CPU_IRQ(3));
++}
++
++static void ath79_ip3_enable(struct irq_data *data)
++{
++	enable_irq(ATH79_CPU_IRQ(3));
++}
++
  void __init arch_init_irq(void)
  {
++	ip2_chip = dummy_irq_chip;
++	ip3_chip = dummy_irq_chip;
++	ip2_chip.irq_disable = ath79_ip2_disable;
++	ip2_chip.irq_enable = ath79_ip2_enable;
++	ip3_chip.irq_disable = ath79_ip3_disable;
++	ip3_chip.irq_enable = ath79_ip3_enable;
++
  	if (soc_is_ar71xx()) {
-@@ -355,7 +394,7 @@
+ 		ath79_ip2_handler = ar71xx_ip2_handler;
+ 		ath79_ip3_handler = ar71xx_ip3_handler;
+@@ -355,7 +419,7 @@
  		ath79_ip3_handler = ar934x_ip3_handler;
  	} else if (soc_is_qca953x()) {
  		ath79_ip2_handler = ath79_default_ip2_handler;
@@ -690,11 +745,11 @@ Index: linux-3.10.49/arch/mips/ath79/irq.c
  	} else if (soc_is_qca955x()) {
  		ath79_ip2_handler = ath79_default_ip2_handler;
  		ath79_ip3_handler = ath79_default_ip3_handler;
-@@ -369,6 +408,8 @@
+@@ -369,6 +433,8 @@
  
  	if (soc_is_ar934x())
  		ar934x_ip2_irq_init();
-+        else if (soc_is_qca953x())
++	else if (soc_is_qca953x())
 +		qca953x_irq_init();
  	else if (soc_is_qca955x())
  		qca955x_irq_init();
@@ -919,7 +974,7 @@ Index: linux-3.10.49/arch/mips/ath79/dev-eth.c
 Index: linux-3.10.49/arch/mips/ath79/Kconfig
 ===================================================================
 --- linux-3.10.49.orig/arch/mips/ath79/Kconfig	2015-07-15 15:46:35.758715829 -0600
-+++ linux-3.10.49/arch/mips/ath79/Kconfig	2015-07-15 15:46:35.770715872 -0600
++++ linux-3.10.49/arch/mips/ath79/Kconfig	2015-07-15 16:03:18.130192074 -0600
 @@ -1121,6 +1121,11 @@
  config ATH79_DEV_USB
  	def_bool n
@@ -935,7 +990,7 @@ Index: linux-3.10.49/arch/mips/ath79/Kconfig
 Index: linux-3.10.49/arch/mips/ath79/Makefile
 ===================================================================
 --- linux-3.10.49.orig/arch/mips/ath79/Makefile	2015-07-15 15:46:35.750715802 -0600
-+++ linux-3.10.49/arch/mips/ath79/Makefile	2015-07-15 15:46:35.770715872 -0600
++++ linux-3.10.49/arch/mips/ath79/Makefile	2015-07-15 16:03:18.118192031 -0600
 @@ -25,6 +25,7 @@
  obj-$(CONFIG_ATH79_DEV_M25P80)		+= dev-m25p80.o
  obj-$(CONFIG_ATH79_DEV_NFC)		+= dev-nfc.o
