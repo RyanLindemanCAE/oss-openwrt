@@ -1,6 +1,8 @@
---- a/arch/mips/ath79/Kconfig
-+++ b/arch/mips/ath79/Kconfig
-@@ -163,6 +163,52 @@ config ATH79_MACH_AP96
+Index: linux-3.10.49/arch/mips/ath79/Kconfig
+===================================================================
+--- linux-3.10.49.orig/arch/mips/ath79/Kconfig	2015-07-15 15:58:06.617111740 -0600
++++ linux-3.10.49/arch/mips/ath79/Kconfig	2015-07-15 15:58:06.629111782 -0600
+@@ -163,6 +163,52 @@
  	select ATH79_DEV_M25P80
  	select ATH79_DEV_USB
  
@@ -53,9 +55,11 @@
  config ATH79_MACH_DB120
  	bool "Atheros DB120 reference board"
  	select SOC_AR934X
---- a/arch/mips/ath79/Makefile
-+++ b/arch/mips/ath79/Makefile
-@@ -56,6 +56,9 @@ obj-$(CONFIG_ATH79_MACH_ARCHER_C7)	+= ma
+Index: linux-3.10.49/arch/mips/ath79/Makefile
+===================================================================
+--- linux-3.10.49.orig/arch/mips/ath79/Makefile	2015-07-15 15:58:06.617111740 -0600
++++ linux-3.10.49/arch/mips/ath79/Makefile	2015-07-15 15:58:06.629111782 -0600
+@@ -56,6 +56,9 @@
  obj-$(CONFIG_ATH79_MACH_AW_NR580)	+= mach-aw-nr580.o
  obj-$(CONFIG_ATH79_MACH_BHU_BXU2000N2_A)+= mach-bhu-bxu2000n2-a.o
  obj-$(CONFIG_ATH79_MACH_CAP4200AG)	+= mach-cap4200ag.o
@@ -65,9 +69,11 @@
  obj-$(CONFIG_ATH79_MACH_DB120)		+= mach-db120.o
  obj-$(CONFIG_ATH79_MACH_DIR_505_A1)	+= mach-dir-505-a1.o
  obj-$(CONFIG_ATH79_MACH_DIR_600_A1)	+= mach-dir-600-a1.o
---- a/arch/mips/ath79/machtypes.h
-+++ b/arch/mips/ath79/machtypes.h
-@@ -39,6 +39,9 @@ enum ath79_mach_type {
+Index: linux-3.10.49/arch/mips/ath79/machtypes.h
+===================================================================
+--- linux-3.10.49.orig/arch/mips/ath79/machtypes.h	2015-07-15 15:58:06.621111753 -0600
++++ linux-3.10.49/arch/mips/ath79/machtypes.h	2015-07-15 15:58:06.629111782 -0600
+@@ -39,6 +39,9 @@
  	ATH79_MACH_BHU_BXU2000N2_A1,	/* BHU BXU2000n-2 A1 */
  	ATH79_MACH_CAP4200AG,		/* Senao CAP4200AG */
  	ATH79_MACH_CARAMBOLA2,		/* 8devices Carambola2 */
@@ -77,9 +83,11 @@
  	ATH79_MACH_DB120,		/* Atheros DB120 reference board */
  	ATH79_MACH_PB44,		/* Atheros PB44 reference board */
  	ATH79_MACH_DIR_505_A1,		/* D-Link DIR-505 rev. A1 */
---- /dev/null
-+++ b/arch/mips/ath79/mach-cus531.c
-@@ -0,0 +1,194 @@
+Index: linux-3.10.49/arch/mips/ath79/mach-cus531.c
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.10.49/arch/mips/ath79/mach-cus531.c	2015-07-15 15:59:31.941407647 -0600
+@@ -0,0 +1,195 @@
 +/*
 + * Atheros CUS531 reference board support
 + *
@@ -120,6 +128,8 @@
 +#include "dev-i2c.h"
 +#include "machtypes.h"
 +
++#define CUS531_GPIO_SPI_CS0		5
++#define CUS531_GPIO_SPI_CS1		11
 +#define CUS531_GPIO_LED_SYS		12
 +#define CUS531_GPIO_I2C_SCL		16
 +#define CUS531_GPIO_I2C_SDA		17
@@ -220,7 +230,6 @@
 +
 +	cus531_gpio_led_setup();
 +
-+       printk("ath79_register_usb\n");
 +	ath79_register_usb();
 +
 +	ath79_register_wmac(art + CUS531_WMAC_CALDATA_OFFSET, NULL);

@@ -1,6 +1,8 @@
---- a/arch/mips/ath79/Kconfig
-+++ b/arch/mips/ath79/Kconfig
-@@ -104,6 +104,20 @@ config ATH79_MACH_AP136
+Index: linux-3.10.49/arch/mips/ath79/Kconfig
+===================================================================
+--- linux-3.10.49.orig/arch/mips/ath79/Kconfig	2015-07-15 15:46:35.770715872 -0600
++++ linux-3.10.49/arch/mips/ath79/Kconfig	2015-07-15 15:56:24.616758000 -0600
+@@ -104,6 +104,20 @@
  	  Say 'Y' here if you want your kernel to support the
  	  Atheros AP136 or AP135 reference boards.
  
@@ -21,9 +23,11 @@
  config ATH79_MACH_AP81
  	bool "Atheros AP81 reference board"
  	select SOC_AR913X
---- a/arch/mips/ath79/Makefile
-+++ b/arch/mips/ath79/Makefile
-@@ -46,6 +46,7 @@ obj-$(CONFIG_ATH79_MACH_AP113)		+= mach-
+Index: linux-3.10.49/arch/mips/ath79/Makefile
+===================================================================
+--- linux-3.10.49.orig/arch/mips/ath79/Makefile	2015-07-15 15:46:35.770715872 -0600
++++ linux-3.10.49/arch/mips/ath79/Makefile	2015-07-15 15:56:24.604757959 -0600
+@@ -47,6 +47,7 @@
  obj-$(CONFIG_ATH79_MACH_AP121)		+= mach-ap121.o
  obj-$(CONFIG_ATH79_MACH_AP132)		+= mach-ap132.o
  obj-$(CONFIG_ATH79_MACH_AP136)		+= mach-ap136.o
@@ -31,9 +35,11 @@
  obj-$(CONFIG_ATH79_MACH_AP81)		+= mach-ap81.o
  obj-$(CONFIG_ATH79_MACH_AP83)		+= mach-ap83.o
  obj-$(CONFIG_ATH79_MACH_AP96)		+= mach-ap96.o
---- /dev/null
-+++ b/arch/mips/ath79/mach-ap143.c
-@@ -0,0 +1,141 @@
+Index: linux-3.10.49/arch/mips/ath79/mach-ap143.c
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.10.49/arch/mips/ath79/mach-ap143.c	2015-07-15 15:57:41.425024374 -0600
+@@ -0,0 +1,142 @@
 +/*
 + * Atheros AP143 reference board support
 + *
@@ -149,6 +155,7 @@
 +
 +	ath79_register_usb();
 +
++	ath79_wmac_set_led_pin(AP143_GPIO_LED_WLAN);
 +	ath79_register_wmac(art + AP143_WMAC_CALDATA_OFFSET, NULL);
 +
 +	ath79_register_mdio(0, 0x0);
@@ -175,9 +182,11 @@
 +
 +MIPS_MACHINE(ATH79_MACH_AP143, "AP143", "Qualcomm Atheros AP143 reference board",
 +	     ap143_setup);
---- a/arch/mips/ath79/machtypes.h
-+++ b/arch/mips/ath79/machtypes.h
-@@ -28,6 +28,7 @@ enum ath79_mach_type {
+Index: linux-3.10.49/arch/mips/ath79/machtypes.h
+===================================================================
+--- linux-3.10.49.orig/arch/mips/ath79/machtypes.h	2015-07-15 15:46:35.746715788 -0600
++++ linux-3.10.49/arch/mips/ath79/machtypes.h	2015-07-15 15:56:24.624758029 -0600
+@@ -28,6 +28,7 @@
  	ATH79_MACH_AP135_020,		/* Atheros AP135-020 reference board */
  	ATH79_MACH_AP136_010,		/* Atheros AP136-010 reference board */
  	ATH79_MACH_AP136_020,		/* Atheros AP136-020 reference board */
